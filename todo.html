@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: gray;
+      margin: 20px;
+    }
+    #container {
+      background-color: whitesmoke;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    /* New: Counter styling */
+    #counter {
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    #todoInput {
+      width: 70%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #addBtn {
+      padding: 10px;
+      font-size: 16px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+    li.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>What Should I Do? -UwU-</h2>
+    <!-- Counter element -->
+    <p id="counter">Tasks Left: 0</p>
+    <input type="text" id="todoInput" placeholder="Enter a new task">
+    <button id="addBtn">Add Task</button>
+    <ul id="todoList"></ul>
+  </div>
+  <script>
+    // Grab DOM elements
+    const input = document.getElementById('todoInput');
+    const addBtn = document.getElementById('addBtn');
+    const todoList = document.getElementById('todoList');
+    const counterDisplay = document.getElementById('counter');
+
+    // -------------------------------
+    // Local Storage Functions
+    // -------------------------------
+    // Save tasks to localStorage
+    function saveTasks() {
+      const tasks = [];
+      const listItems = todoList.querySelectorAll('li');
+      listItems.forEach(li => {
+        tasks.push({
+          text: li.textContent,
+          completed: li.classList.contains('completed')
+        });
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Load tasks from localStorage
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks'));
+      if (tasks) {
+        tasks.forEach(task => {
+          createTaskElement(task.text, task.completed);
+        });
+      }
+      updateCounter();
+    }
+
+    // -------------------------------
+    // Counter Function
+    // -------------------------------
+    // Update the counter display based on non-completed tasks
+    function updateCounter() {
+      const listItems = todoList.querySelectorAll('li');
+      let count = 0;
+      listItems.forEach(li => {
+        if (!li.classList.contains('completed')) {
+          count++;
+        }
+      });
+      counterDisplay.textContent = 'Tasks Left: ' + count;
+    }
+
+    // -------------------------------
+    // Task Creation & Interaction
+    // -------------------------------
+    // Create a new task element in the DOM and attach event listeners
+    function createTaskElement(taskText, completed = false) {
+      const li = document.createElement('li');
+      li.textContent = taskText;
+      if (completed) {
+        li.classList.add('completed');
+      }
+      // Toggle the 'completed' state on click
+      li.addEventListener('click', function() {
+        li.classList.toggle('completed');
+        saveTasks();    // Save changes when toggled
+        updateCounter(); // Update the counter
+      });
+      todoList.appendChild(li);
+    }
+
+    // Add a new task using the text from the input field
+    function addTask() {
+      const taskText = input.value.trim();
+      if (taskText !== "") {
+        createTaskElement(taskText);
+        input.value = "";
+        saveTasks();    // Save the new task
+        updateCounter(); // Update the counter
+      }
+    }
+
+    // Event Listeners for button click and pressing "Enter"
+    addBtn.addEventListener('click', addTask);
+    input.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        addTask();
+      }
+    });
+
+    // Load tasks from localStorage when the page loads
+    window.onload = loadTasks;
+  </script>
+</body>
+</html>
